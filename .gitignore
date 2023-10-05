@@ -1,0 +1,54 @@
+# Node.js
+node_modules/
+
+# Logs
+logs
+*.log
+
+# Environment variables
+
+# Dependency directories
+# https://docs.npmjs.com/cli/v7/configuring-npm/package-json#workspaces
+# Workspaces are packages in the same repository managed by Lerna or yarn
+/packages/*/node_modules
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional compiled TypeScript files
+*.tsbuildinfo
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn
+.yarn/
+.yarnrc
+.yarn-integrity
+.pnp.*
+
+# Yarn v2
+.cache/
+*/.pnp.*
+!/*/package.json
+!/*/yarn.lock
+
+# IntelliJ IDEA
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Build files
+build/
+dist/
