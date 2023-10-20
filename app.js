@@ -40,6 +40,7 @@ app.use(logging('tiny'));
 app.use('/calendar' , require('./routes/memo'))
 app.use('/activity', require('./routes/activity'));
 app.use('/post', require('./routes/post'));
+app.use('/dashboard', require('./routes/dashboard'));
 
 const ipAddress = '127.0.0.1';
 const port = 8000;
