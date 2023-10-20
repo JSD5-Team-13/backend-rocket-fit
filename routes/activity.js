@@ -45,4 +45,43 @@ router.post('/', async (req, res) => {
 
 })
 
+router.post("/create", async (req, res) => {
+  const reqData = req.body;
+  try {
+    if (!reqData) {
+      return res.status(400).json({ error: "Activity data is missing" });
+    }
+
+    const newActivity = new Activity({
+      user: req.user.id,
+      ...reqData,
+    });
+
+    const validationError = newActivity.validateSync();
+
+    if (validationError) {
+      const errors = Object.values(validationError.errors).map(
+        (error) => error.message
+      );
+
+      return res.status(400).json({ error: errors });
+    }
+    
+    const savedActivity = await newActivity.save();
+
+    const user = await User.findById(req.user.id);
+
+    user.activities.push(newActivity._id);
+    await user.save();
+
+    res.status(201).json(savedActivity);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
+
 module.exports = router;
