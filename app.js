@@ -1,13 +1,17 @@
 const express = require ('express');
 const mongoose = require ('mongoose');
 const passport = require ('passport');
+const passportJWT = require('passport-jwt');
+const ExtractJWT = passportJWT.ExtractJwt;
+const JWTStrategy = passportJWT.Strategy;
 const cookieParser = require ('cookie-parser');
 const cors = require ('cors');
 const logging = require ('morgan');
-require('dotenv').config()
+require('dotenv').config();
 
-const app = express()
+const app = express();
 const database = process.env.DATABASE_URL
+const secretKey = process.env.JWT_SECRET_KEY
 
 mongoose.Promise = global.Promise;
 
@@ -35,9 +39,30 @@ app.use(express.json());
 app.use(express.urlencoded({ extended : true}));
 app.use(cookieParser());
 app.use(logging('tiny'));
+app.use(passport.initialize());
+
+
+passport.use(new JWTStrategy({
+    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+    secretOrKey: secretKey,
+}, (jwtPayload, done) => {
+    UserActivation.findById(jwtPayload.sub, (error, user) => {
+        if (error) {
+            return done(error, false);
+        }
+        if (user) {
+            return done(null, user);
+        } else {
+            return done(null, false);
+        }
+    });
+}));
+
+
 
 //Routes
-app.use('/calendar' , require('./routes/memo'))
+app.use('/calendar' ,  require('./routes/memo'))
+app.use('/activity' , passport.authenticate('jwt', {session: false}), require('./routes/activity'))
 
 const ipAddress = '127.0.0.1';
 const port = 8000;
