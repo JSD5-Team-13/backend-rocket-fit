@@ -1,9 +1,12 @@
-const mongoose = require ('mongoose');
+const mongoose = require("mongoose");
 
 const memoSchema = new mongoose.Schema({
-    title : String,
-    activity_type : String,
-    description : String
-})
+  date: String,
+  title: String,
+  startTime: String,
+  endTime: String,
+  activity: String,
+  description: String,
+});
 
-module.exports = mongoose.model('memo' , memoSchema);
+module.exports = mongoose.model("memo", memoSchema);

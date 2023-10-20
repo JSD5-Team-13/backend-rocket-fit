@@ -38,6 +38,8 @@ app.use(logging('tiny'));
 
 //Routes
 app.use('/calendar' , require('./routes/memo'))
+app.use('/register' , require('./routes/register'))
+app.use('/login' , require('./routes/login'))
 
 const ipAddress = '127.0.0.1';
 const port = 8000;
