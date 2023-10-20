@@ -16,6 +16,8 @@ const activitySchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    //ฝนเพิ่มโมเดล
+    // userId: Number,
   },
   { collection: "activities", timestamps: true }
 );
