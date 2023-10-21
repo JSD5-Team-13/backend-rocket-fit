@@ -7,6 +7,7 @@ const JWTStrategy = passportJWT.Strategy;
 const cookieParser = require ('cookie-parser');
 const cors = require ('cors');
 const logging = require ('morgan');
+const { auth } = require('./middleware/auth');
 require('dotenv').config();
 
 const app = express();
@@ -61,12 +62,16 @@ passport.use(new JWTStrategy({
 
 
 //Routes
-app.use('/calendar' ,  require('./routes/memo'))
-app.use('/activity' , passport.authenticate('jwt', {session: false}), require('./routes/activity'))
+app.use('/calendar' , require('./routes/memo'))
+app.use('/register' , require('./routes/register'))
+app.use('/login' , require('./routes/login'))
+app.use('/activity', auth, require('./routes/activity'));
+app.use('/post', require('./routes/post'));
+app.use('/dashboard', require('./routes/dashboard'));
+
 
 const ipAddress = '127.0.0.1';
 const port = 8000;
-
 app.listen(port , ipAddress , () => {
     console.log(`Server starting on IP:${ipAddress} Port: ${port}`)
 })

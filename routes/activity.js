@@ -1,87 +1,126 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { Activity } = require('../models/activity.js');
+const Activity = require("../models/activity");
 
-router.get('/', async (req, res) => {
-    try {
-        const activities = await Activity.find();
-        res.status(200).json(activities);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({error: "Internal Server Error" });
-    }
-});
-
-
-router.get('/:id', async (req, res) => {
-    try {
-        const activityDataById = req.params.id;
-        const activity = await Activity.findById(activityDataById);
-        res.status(200).json(activity);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({error: 'Internal Server Error'});
-    }
-
-});
-
-router.post('/', async (req, res) => {
-    try {
-        const activityData = req.body;
-        const newActivity = new Activity({
-            activity_type: activityData.activity_type,
-            title: activityData.title,
-            description: activityData.description,
-            duration_time: activityData.duration_time,
-            img_url: activityData.img_url,
-            user: activityData.user,
-        })
-
-        res.status(201).json(activity);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({error: 'Internal Server Error'});
-    }
-
-})
-
-router.post("/create", async (req, res) => {
-  const reqData = req.body;
+// Get all activity cards
+router.get("/", async (request, response) => {
   try {
-    if (!reqData) {
-      return res.status(400).json({ error: "Activity data is missing" });
-    }
-
-    const newActivity = new Activity({
-      user: req.user.id,
-      ...reqData,
-    });
-
-    const validationError = newActivity.validateSync();
-
-    if (validationError) {
-      const errors = Object.values(validationError.errors).map(
-        (error) => error.message
-      );
-
-      return res.status(400).json({ error: errors });
-    }
-    
-    const savedActivity = await newActivity.save();
-
-    const user = await User.findById(req.user.id);
-
-    user.activities.push(newActivity._id);
-    await user.save();
-
-    res.status(201).json(savedActivity);
+    const activities = await Activity.find({ activity_status: true });
+    response.status(200).json(activities);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    response
+      .status(500)
+      .json({ message: "Failed to get activities", error: error.message });
   }
 });
 
+// Get one activity card by ID
+router.get("/:id", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const activity = await Activity.findById(id);
+    if (!activity) {
+      return response.status(404).json({ message: "Activity not found" });
+    }
+    response.status(200).json(activity);
+  } catch (error) {
+    response
+      .status(500)
+      .json({ message: "Failed to get activity", error: error.message });
+  }
+});
+
+// Create a new activity card
+router.post("/", async (request, response) => {
+  try {
+    const newActivity = request.body;
+    const activity = await Activity.create(newActivity);
+    response
+      .status(200)
+      .json({ message: "Activity created successfully", activity });
+  } catch (error) {
+    response
+      .status(500)
+      .json({ message: "Failed to create activity", error: error.message });
+  }
+});
+
+router.post("/create", async (request, response) => {
+    const reqActivityData = req.body;
+    const userId = req.user.id
+    try {
+      if (!reqData) {
+        return res.status(400).json({ error: "Activity data is missing" });
+      }
+  
+      const newActivity = new Activity({
+        user: req.user.id,
+        ...reqData,
+      });
+  
+      const validationError = newActivity.validateSync();
+  
+      if (validationError) {
+        const errors = Object.values(validationError.errors).map(
+          (error) => error.message
+        );
+  
+        return res.status(400).json({ error: errors });
+      }
+      
+      const savedActivity = await newActivity.save();
+  
+      const user = await User.findById(req.user.id);
+  
+      user.activities.push(newActivity._id);
+      await user.save();
+  
+      res.status(201).json(savedActivity);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
 
 
+
+// Update a activity card
+router.put("/:id", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const updateActivity = request.body;
+    const result = await Activity.findByIdAndUpdate(id, updateActivity);
+    if (!result) {
+      return response.status(404).json({ message: "Activity not found" });
+    }
+    response
+      .status(200)
+      .json({ message: "Activity updated successfully", result });
+  } catch (error) {
+    response
+      .status(500)
+      .json({ message: "Failed to update activity", error: error.message });
+  }
+});
+
+// Delete a activity card (soft delete)
+router.delete("/:id", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const activity = await Activity.findById(id);
+    if (!activity) {
+      return response.status(404).json({ message: "Activity not found" });
+    }
+
+    activity.activity_status = false;
+    await activity.save();
+    
+    response.status(200).json({ message: "Activity deleted successfully" });
+  } catch (error) {
+    response
+      .status(500)
+      .json({ message: "Failed to delete activity", error: error.message });
+  }
+});
 
 module.exports = router;
