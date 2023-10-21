@@ -5,7 +5,10 @@ const Activity = require("../models/activity");
 // Get all activity cards
 router.get("/", async (request, response) => {
   try {
-    const activities = await Activity.find({ activity_status: true });
+    const userId = request.query.userId
+    const activities = await Activity.find({ 
+    activity_status: true,
+    created_by: userId});
     response.status(200).json(activities);
   } catch (error) {
     response
@@ -33,8 +36,11 @@ router.get("/:id", async (request, response) => {
 // Create a new activity card
 router.post("/", async (request, response) => {
   try {
-    const newActivity = request.body;
-    const activity = await Activity.create(newActivity);
+    const {userId , ...newActivity} = request.body;
+    const activity = await Activity.create({
+      ...newActivity,
+      created_by : userId
+    });
     response
       .status(200)
       .json({ message: "Activity created successfully", activity });

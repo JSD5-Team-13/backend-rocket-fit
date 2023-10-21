@@ -22,7 +22,7 @@ mongoose.connection.on('connected' , () => {
 });
 
 const allowedMethods = ['GET' , 'PUT' , 'POST', 'DELETE'];
-const allowedHeaders = ['Authorization' , 'Content-Type'];
+const allowedHeaders = ['Authorization' , 'Content-Type', "x-auth-token"];
 
 app.use(cors({
     origin : 'http://localhost:5173',
