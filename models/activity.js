@@ -8,10 +8,10 @@ const activitySchema = new mongoose.Schema(
     date: Date,
     duration: Number,
     image: String,
-    // user: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "User",
-    // },
+    created_by : {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     activity_status: {
       type: Boolean,
       default: true,

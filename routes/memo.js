@@ -4,7 +4,8 @@ const Memo = require ('../models/calendar.js');
 
 router.get('/' , async (req , res) => {
     try {
-        const listMemo = await Memo.find(req.params)
+        const userId = req.query.userId
+        const listMemo = await Memo.find({ created_by : userId})
         res.status(200).json(listMemo);
     } catch (error) {
         console.log("Get memo error" , error);
@@ -24,9 +25,10 @@ router.get('/:id' , async (req , res) => {
 
 router.post('/', async (req , res) => {
     try {
-        const memoData = req.body;
+        const {userId , ...memoData} = req.body;
         const memo = await Memo.create({
-            ...memoData
+            ...memoData,
+            created_by : userId
         });
         res.status(200).json(memo);
     } catch (error) {

@@ -4,6 +4,7 @@ const passport = require ('passport');
 const cookieParser = require ('cookie-parser');
 const cors = require ('cors');
 const logging = require ('morgan');
+const Auth = require ('./middleware/auth.js')
 require('dotenv').config()
 
 const app = express()
@@ -24,7 +25,7 @@ const allowedMethods = ['GET' , 'PUT' , 'POST', 'DELETE'];
 const allowedHeaders = ['Authorization' , 'Content-Type'];
 
 app.use(cors({
-    origin : '*',
+    origin : 'http://localhost:5173',
     methods: allowedMethods.join(', '),
     allowedHeaders : allowedHeaders.join(', '),
     credentials: true,
@@ -36,6 +37,10 @@ app.use(express.urlencoded({ extended : true}));
 app.use(cookieParser());
 app.use(logging('tiny'));
 
+
+//Protected Routes
+
+
 //Routes
 app.use('/calendar' , require('./routes/memo'))
 app.use('/register' , require('./routes/register'))
@@ -43,6 +48,13 @@ app.use('/login' , require('./routes/login'))
 app.use('/activity', require('./routes/activity'));
 app.use('/post', require('./routes/post'));
 app.use('/dashboard', require('./routes/dashboard'));
+
+app.use(Auth)
+app.use('/users', require('./routes/user'))
+
+//Auth
+
+
 
 const ipAddress = '127.0.0.1';
 const port = 8000;
