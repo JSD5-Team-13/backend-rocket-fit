@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Activity = require("../models/activity");
 
+//get all data
 router.get("/", async (req, res) => {
   //durationPerDay = bar-chart
   //activityPerWeek = pie-chart
@@ -40,16 +41,12 @@ router.get("/", async (req, res) => {
   };
   //เตรียมข้อมูลให้เป็นรูปแบบเดียวกันกับ initialData
   try {
-    //สัปดาห์นี้มีการออกกำลังกายไหม this week!
-    //เวลาที่บันทึกมา คือวันอะไร(จ. อ. พ.?)
-    //การ์ดออกกำลังกายที่บันทึกมา อยู่ในช่วงสัปดาห์ของเวลาปัจจุบันหรือไม่?
     let result = initialData;
     const activities = await Activity.find({ activity_status: true });
     const today = new Date(new Date().setUTCHours(0, 0, 0, 0));
     const firstDayOfWeek = today.getDate() - today.getDay();
     const lastDayOfWeek = today.getDate() + today.getDay();
 
-    //ถ้าอยู่ในช่วงสัปดาห์ปัจจุบัน ให้แสดงผลประเภทออกกำลังกายในการ์ดนั้นออกมา
     const weeklyActivityData = activities.filter((item) => {
       const isThisWeekData =
         item.date >= new Date(today.setDate(firstDayOfWeek)) &&
@@ -57,26 +54,20 @@ router.get("/", async (req, res) => {
       if (isThisWeekData) return item;
     });
 
-    //มี activity ซ้ำกันไหม ให้รวมเป็นค่าเดียว
     weeklyActivityData.forEach((item) => {
-      //แล้วออกกำลังกายวันไหน (จ อ พ)
       const activityDayOfWeek = new Date(item.date).getDay();
       const dayDuration = result.durationPerDay[activityDayOfWeek];
       dayDuration.value += item.duration;
-      //นับค่าเดียวกัน ไว้ในก้อนเดียวกัน
       const duplicatedActivity = result.activityPerWeek.find(
         (activity) => activity.activityType === item.activity_type
       );
 
-      //ถ้าค่าไม่ซ้ำเอาไปใส่ใน arr ไว้ก่อนได้เลย
       if (!duplicatedActivity) {
         result.activityPerWeek.push({
           activityType: item.activity_type,
           value: 1,
         });
-      }
-      //ถ้าซ้ำกัน ให้นับค่าเพิ่ม arr เดิมมีโครงอยู่แล้ว ค่านี้จะถูกแสดงเลย
-      else {
+      } else {
         duplicatedActivity.value++;
       }
     });
@@ -87,8 +78,10 @@ router.get("/", async (req, res) => {
   }
 });
 
+//get data by id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
+  //set format for use on bar-chart and pie-chart
   const initialData = {
     durationPerDay: [
       {
@@ -125,37 +118,63 @@ router.get("/:id", async (req, res) => {
 
   try {
     let result = initialData;
+
+    //กำหนดตัวแปร activities ไปหาข้อมูลที่ต้องการ จาก Database ของ Activity
     const activities = await Activity.find({
-      //ต้องการค่าอะไรบ้าง
+      //ต้องการค่าอะไรมาใช้บ้าง
       created_by: id,
       activity_status: true,
     });
+
+    //.setUTCHours ให้เท่ากันทั้งหมด ไม่นับเวลาที่กรอกมา
     const today = new Date(new Date().setUTCHours(0, 0, 0, 0));
+
+    //วันแรกของสัปดาห์นี้ = วันนี้ของเดือน - วันของสัปดาห์
+    //.getDate() ได้วันที่ 1-31
+    //.getDay()  ได้ค่าวัน 0-6 (อาทิตย์=0, เสาร์=6)
+    //วันนี้ อาทิตย์ ที่ 22 เดือนตุลาคม 2566
+    //example: 22-6(วันอาทิตย์) = 16(วันจันทร์)
     const firstDayOfWeek = new Date(
       today.setDate(today.getDate() - today.getDay())
     );
+
     const lastDayOfWeek = new Date(
       today.setDate(today.getDate() + today.getDay())
     );
+
+    //.setUTCHours(23, 59, 59) กำหนดเวลาสิ้นสุดวันสุดท้ายของสัปดาห์
     const lastDayBeforeMidnight = new Date(
       lastDayOfWeek.setUTCHours(23, 59, 59)
     );
 
+    //ไปกรองข้อมูล weeklyActivityData จาก Database ของ Activity ที่อยู่ในช่วง 1 สัปดาห์
     const weeklyActivityData = activities.filter((item) => {
       const isThisWeekData =
         item.date >= firstDayOfWeek && item.date <= lastDayBeforeMidnight;
       if (isThisWeekData) return item;
     });
 
-    // piechrat
-    weeklyActivityData.forEach((item) => {
-      const activityDayOfWeek = new Date(item.date).getDay();
-      const dayDuration = result.durationPerDay[activityDayOfWeek];
-      dayDuration.value += item.duration;
+    // pie-chrat: ใช้ข้อมูล ประเภทกีฬา และ จำนวนครั้งที่ออกกำลังกาย ต่อ สัปดาห์
+    //นำการ์ดข้อมูลแต่ละใบลูปหา
+    //loop ที่ 1 จะได้วัน และ ระยะเวลา
+    //เอาค่าตัวเลขที่ได้ match กับ index ใน durationPerDay มีค่า 0-6 ที่มีค่าตรงกับ .getDay
 
-      const duplicatedActivity = result.activityPerWeek.find(
-        (activity) => activity.activityType === item.activity_type
-      );
+    weeklyActivityData.forEach((item) => {
+      const activityDayOfWeek = new Date(item.date).getDay(); //หาวันของสัปดาห์
+      const dayDuration = result.durationPerDay[activityDayOfWeek];
+      dayDuration.value += item.duration; 
+
+    //loop ที่ 2 จะได้จำนวนครั้ง(value) และ ประเภท(activityType)
+    //การ์ดที่ได้จาก loop 1 เอามาใช้ลูปใน loop ที่ 2
+    //มีการออกกำลังกายแต่ละประเภทกี่ครั้ง ต่อ สัปดาห์
+    //การด์ที่สร้างมา activityType ตรงกับ activity_type ของ activitySchema ไหม
+    //activityPerWeek มีค่าเป็น arr [] ว่างเปล่า
+    //ค่าแรกจากการ์ดใบแรกที่ลูปมาจะเอาไปใส่ใน arr และให้ค่า value = 1
+    //การ์ดใบต่อมา ถ้าค่า activityType ซ้ำกัน ให้เพิ่มค่า value + 1
+ 
+      const duplicatedActivity = result.activityPerWeek.find((resultArray) => {
+        return resultArray.activityType === item.activity_type;
+      });
 
       if (!duplicatedActivity) {
         result.activityPerWeek.push({
