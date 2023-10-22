@@ -6,7 +6,10 @@ const Activity = require("../models/activity");
 // Get all posts
 router.get("/", async (request, response) => {
   try {
-    const posts = await Post.find({ post_status: true });
+    const userId = request.query.userId
+    const posts = await Post.find({ 
+      post_status: true ,
+      created_by : userId});
     response.status(200).json(posts);
   } catch (error) {
     response
@@ -18,8 +21,8 @@ router.get("/", async (request, response) => {
 // Get one post by ID
 router.get("/:id", async (request, response) => {
   try {
-    const { id } = request.params;
-    const post = await Post.findById(id);
+    const id  = request.params.id;
+    const post = await Post.find({created_by : id});
     if (!post) {
       return response.status(404).json({ message: "Post not found" });
     }
@@ -49,6 +52,7 @@ router.post("/", async (request, response) => {
       activity_describe: originalActivity.activity_describe,
       duration: originalActivity.duration,
       image: originalActivity.image,
+      created_by:originalActivity.created_by
     });
 
     await newPost.save();
