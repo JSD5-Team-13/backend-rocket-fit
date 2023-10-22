@@ -41,6 +41,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "Not specified",
     },
+    profile_url: {
+      type: String,
+      default: null,
+    },
     aboutMe: {
       type: String,
       default: null,

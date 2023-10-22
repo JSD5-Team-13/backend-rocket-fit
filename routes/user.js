@@ -1,7 +1,6 @@
 const express = require ('express');
 const router = express.Router();
 const bcrypt = require("bcrypt")
-// const { auth } = require('../middleware/auth');
 
 const User = require('../models/users');
 const auth = require('../middleware/auth');
@@ -16,17 +15,6 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-
-// //GET users listing
-// router.get('/' , async (req , res) => {
-//     try {
-//         const listUsers = await User.find({})
-//         res.status(200).json(listUsers);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// });
 
 //GET user profile
 router.get('/:id' , async (req , res) => {
@@ -48,9 +36,12 @@ router.get('/:id' , async (req , res) => {
 });
 
 //PUT update user
-router.put("/profile/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId= req.params.id;
+    console.log('User ID:', userId);
+    const token = req.headers.authorization;
+    // console.log('Authentication Token:', token);
     const userData = req.body;
     const updatedUser = await User.findByIdAndUpdate(userId, userData);
 
@@ -59,7 +50,7 @@ router.put("/profile/:id", async (req, res) => {
     }
 
     res
-      .status(201)
+      .status(200)
       .json({ message: "User data updated successfully", updatedUser });
   } catch (error) {
     console.error("Update user account error:", error);
@@ -68,7 +59,7 @@ router.put("/profile/:id", async (req, res) => {
 });
 
 //PUT update user password
-router.put("profile/password/:id", async (req, res) => {
+router.put("/password/:id", async (req, res) => {
   try {
     const userData = req.body;
     const userId = req.params.id;
@@ -110,13 +101,7 @@ router.put("profile/password/:id", async (req, res) => {
     // Update the user's password and set the updated_at field
     const updatedUserPassword = await User.findByIdAndUpdate(
       userId,
-      {
-        $set: {
-          password: hashedNewPassword,
-          updated_at: new Date(),
-        },
-      },
-      { new: true }
+      {password: hashedNewPassword}
     );
 
     res
@@ -131,7 +116,7 @@ router.put("profile/password/:id", async (req, res) => {
   }
 });
 
-router.put("profile/deactivate/:id", async (req, res) => {
+router.put("/deactivate/:id", async (req, res) => {
   try {
     const userId = req.params.id;
     const reqConfirmToDeactivated = req.body.confirmToDeactivated;
@@ -144,8 +129,7 @@ router.put("profile/deactivate/:id", async (req, res) => {
 
     const user = await User.findByIdAndUpdate(
       userId,
-      { $set: { user_status: true } },
-      { new: true }
+      {user_status: false}
     );
 
     if (!user) {
@@ -166,7 +150,8 @@ router.put("profile/deactivate/:id", async (req, res) => {
       .json({ error: "An error occurred while deleting the account." });
   }
 });
-        
+
+
 
 module.exports = router
 

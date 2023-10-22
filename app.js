@@ -72,6 +72,7 @@ app.use('/login' , require('./routes/login'))
 app.use('/activity', require('./routes/activity'));
 app.use('/post', require('./routes/post'));
 app.use('/dashboard', require('./routes/dashboard'));
+app.use('/upload', require('./routes/upload.js'))
 
 app.use(Auth)
 app.use('/users', require('./routes/user'))
