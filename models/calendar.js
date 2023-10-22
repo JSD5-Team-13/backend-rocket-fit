@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const User = require("./users")
 
 const memoSchema = new mongoose.Schema({
   date: String,
@@ -7,6 +8,7 @@ const memoSchema = new mongoose.Schema({
   endTime: String,
   activity: String,
   description: String,
+  created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
 
 module.exports = mongoose.model("memo", memoSchema);

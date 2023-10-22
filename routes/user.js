@@ -1,25 +1,45 @@
 const express = require ('express');
 const router = express.Router();
-const bcrypt = require("bcrypt");
-const User = require("../models/users");
+const bcrypt = require("bcrypt")
 // const { auth } = require('../middleware/auth');
 
-//GET users listing
-router.get('/' , async (req , res) => {
+const User = require('../models/users');
+const auth = require('../middleware/auth');
+
+router.get('/', auth, async (req, res) => {
     try {
-        const listUsers = await User.find({})
-        res.status(200).json(listUsers);
+        const user = req.user;
+        res.status(200).json(user);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error('Error fetching user data:', error);
+        res.status(500).json({ error: 'Error fetching user data' });
     }
 });
 
+
+// //GET users listing
+// router.get('/' , async (req , res) => {
+//     try {
+//         const listUsers = await User.find({})
+//         res.status(200).json(listUsers);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: "Internal Server Error" });
+//     }
+// });
+
 //GET user profile
-router.get('/profile/:id' , async (req , res) => {
+router.get('/:id' , async (req , res) => {
     try {
-        const {id} = req.params;
-        const user = await User.findById(id)
+      const userId = req.params.id
+      console.log('User ID:', userId);
+      const token = req.headers.authorization;
+      // console.log('Authentication Token:', token);
+      const user = await User.findById(userId);
+      if (!user) {
+          // No user found with the given ID
+          return res.status(404).json({ error: 'User not found' });
+      }
         res.status(200).json(user);
     } catch (error) {
         console.error(error);
@@ -30,13 +50,9 @@ router.get('/profile/:id' , async (req , res) => {
 //PUT update user
 router.put("/profile/:id", async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.params.id;
     const userData = req.body;
-    const updatedUser = await Memo.findByIdAndUpdate(
-      userId,
-      { $set: { ...userData } },
-      { new: true }
-    );
+    const updatedUser = await User.findByIdAndUpdate(userId, userData);
 
     if (!updatedUser) {
       return res.status(404).json({ message: "user data not found" });
@@ -153,3 +169,5 @@ router.put("profile/deactivate/:id", async (req, res) => {
         
 
 module.exports = router
+
+

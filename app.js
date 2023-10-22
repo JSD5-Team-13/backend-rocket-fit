@@ -7,8 +7,8 @@ const JWTStrategy = passportJWT.Strategy;
 const cookieParser = require ('cookie-parser');
 const cors = require ('cors');
 const logging = require ('morgan');
-const { auth } = require('./middleware/auth');
-require('dotenv').config();
+const Auth = require ('./middleware/auth.js')
+require('dotenv').config()
 
 const app = express();
 const database = process.env.DATABASE_URL
@@ -26,10 +26,10 @@ mongoose.connection.on('connected' , () => {
 });
 
 const allowedMethods = ['GET' , 'PUT' , 'POST', 'DELETE'];
-const allowedHeaders = ['Authorization' , 'Content-Type'];
+const allowedHeaders = ['Authorization' , 'Content-Type', "x-auth-token"];
 
 app.use(cors({
-    origin : '*',
+    origin : 'http://localhost:5173',
     methods: allowedMethods.join(', '),
     allowedHeaders : allowedHeaders.join(', '),
     credentials: true,
@@ -61,14 +61,23 @@ passport.use(new JWTStrategy({
 
 
 
+
+//Protected Routes
+
+
 //Routes
 app.use('/calendar' , require('./routes/memo'))
 app.use('/register' , require('./routes/register'))
 app.use('/login' , require('./routes/login'))
-app.use('/activity', auth, require('./routes/activity'));
+app.use('/activity', require('./routes/activity'));
 app.use('/post', require('./routes/post'));
 app.use('/dashboard', require('./routes/dashboard'));
-app.use('/user', require('./routes/user'))
+
+app.use(Auth)
+app.use('/users', require('./routes/user'))
+
+//Auth
+
 
 
 const ipAddress = '127.0.0.1';
