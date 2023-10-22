@@ -23,7 +23,7 @@ router.put("/:id", auth, async (req, res) => {
 router.get("/", auth, async (req, res) => {
   try {
     const { username } = req.user;
-    const userData = await Users.findOne({ username });
+    const userData = await User.findOne({ username });
 
     if (!userData) {
       res.status(404).json({ error: "User not found" });
