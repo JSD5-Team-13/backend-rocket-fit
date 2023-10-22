@@ -2,22 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Activity = require("../models/activity");
 
-// const activityType = {
-//   Running: "running",
-//   Walking: "walking",
-//   Cycling: "cycling",
-//   Swimming: "swimming",
-//   Hiking: "hiking",
-//   WeightTraining: "weight_training",
-//   Yoga: "yoga",
-//   Surfing: "surfing",
-//   Basketball: "basketball",
-//   Football: "football",
-//   Badminton: "badminton",
-//   Tennis: "tennis",
-//   Volleyball: "volleyball",
-// };
-
 router.get("/", async (req, res) => {
   //durationPerDay = bar-chart
   //activityPerWeek = pie-chart
@@ -142,20 +126,27 @@ router.get("/:id", async (req, res) => {
   try {
     let result = initialData;
     const activities = await Activity.find({
-    //ต้องการค่าอะไรบ้าง
-      userId: id,
+      //ต้องการค่าอะไรบ้าง
+      created_by: id,
       activity_status: true,
     });
     const today = new Date(new Date().setUTCHours(0, 0, 0, 0));
-    const firstDayOfWeek = today.getDate() - today.getDay();
-    const lastDayOfWeek = today.getDate() + today.getDay();
+    const firstDayOfWeek = new Date(
+      today.setDate(today.getDate() - today.getDay())
+    );
+    const lastDayOfWeek = new Date(
+      today.setDate(today.getDate() + today.getDay())
+    );
+    const lastDayBeforeMidnight = new Date(
+      lastDayOfWeek.setUTCHours(23, 59, 59)
+    );
 
     const weeklyActivityData = activities.filter((item) => {
       const isThisWeekData =
-        item.date >= new Date(today.setDate(firstDayOfWeek)) &&
-        item.date <= new Date(today.setDate(lastDayOfWeek));
+        item.date >= firstDayOfWeek && item.date <= lastDayBeforeMidnight;
       if (isThisWeekData) return item;
     });
+
     // piechrat
     weeklyActivityData.forEach((item) => {
       const activityDayOfWeek = new Date(item.date).getDay();
