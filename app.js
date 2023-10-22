@@ -68,6 +68,7 @@ app.use('/login' , require('./routes/login'))
 app.use('/activity', auth, require('./routes/activity'));
 app.use('/post', require('./routes/post'));
 app.use('/dashboard', require('./routes/dashboard'));
+app.use('/user', require('./routes/user'))
 
 
 const ipAddress = '127.0.0.1';
