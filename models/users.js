@@ -8,18 +8,24 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
+      unique: true,
       required: true,
     },
     password: {
       type: String,
       required: true,
     },
+    image: {
+      type: String,
+    },
     FirstName: {
       type: String,
+      default: null,
       // required: true,
     },
     LastName: {
       type: String,
+      default: null,
       // required: true,
     },
     DateOfBirth: {
@@ -28,6 +34,7 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
+      default: null,
     },
     height: {
       type: Number,
