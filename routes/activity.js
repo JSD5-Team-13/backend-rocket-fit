@@ -5,10 +5,11 @@ const Activity = require("../models/activity");
 // Get all activity cards
 router.get("/", async (request, response) => {
   try {
-    const userId = request.query.userId
-    const activities = await Activity.find({ 
-    activity_status: true,
-    created_by: userId});
+    const userId = request.query.userId;
+    const activities = await Activity.find({
+      created_by: userId,
+      activity_status: true,
+    });
     response.status(200).json(activities);
   } catch (error) {
     response
@@ -36,10 +37,10 @@ router.get("/:id", async (request, response) => {
 // Create a new activity card
 router.post("/", async (request, response) => {
   try {
-    const {userId , ...newActivity} = request.body;
+    const { userId, ...newActivity } = request.body;
     const activity = await Activity.create({
       ...newActivity,
-      created_by : userId
+      created_by: userId,
     });
     response
       .status(200)
@@ -120,7 +121,7 @@ router.delete("/:id", async (request, response) => {
 
     activity.activity_status = false;
     await activity.save();
-    
+
     response.status(200).json({ message: "Activity deleted successfully" });
   } catch (error) {
     response

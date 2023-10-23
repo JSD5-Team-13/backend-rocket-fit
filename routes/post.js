@@ -6,12 +6,29 @@ const Activity = require("../models/activity");
 // Get all posts
 router.get("/", async (request, response) => {
   try {
-    const posts = await Post.find({ post_status: true });
+    const userId = request.query.userId;
+    const posts = await Post.find({ 
+      created_by: userId,
+      post_status: true });
     response.status(200).json(posts);
   } catch (error) {
     response
       .status(500)
       .json({ message: "Failed to get posts", error: error.message });
+  }
+});
+
+// Get posts by userId
+router.get("/:userId", async (request, response) => {
+  try {
+    const userId = request.params.userId;
+    const posts = await Post.find({
+      created_by: userId,
+      post_status: true,
+    });
+    response.status(200).json(posts);
+  } catch (error) {
+    response.status(500).json({ message: "Failed to get posts", error: error.message });
   }
 });
 
@@ -49,6 +66,7 @@ router.post("/", async (request, response) => {
       activity_describe: originalActivity.activity_describe,
       duration: originalActivity.duration,
       image: originalActivity.image,
+      created_by: originalActivity.created_by,
     });
 
     await newPost.save();

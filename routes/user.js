@@ -16,7 +16,7 @@ router.get("/", auth, async (req, res) => {
 
 
 //GET user profile
-router.get('/:id' , async (req , res) => {
+router.get('/setting/:id' , async (req , res) => {
     try {
       const userId = req.params.id
       console.log('User ID:', userId);
@@ -35,7 +35,7 @@ router.get('/:id' , async (req , res) => {
 });
 
 //PUT update user
-router.put("/:id", auth, async (req, res) => {
+router.put("/setting/account/:id", auth, async (req, res) => {
   try {
     const userId= req.params.id;
     console.log('User ID:', userId);
@@ -58,7 +58,7 @@ router.put("/:id", auth, async (req, res) => {
 });
 
 //PUT update user password
-router.put("/password/:id", async (req, res) => {
+router.put("/setting/password/:id", async (req, res) => {
   try {
     const userData = req.body;
     const userId = req.params.id;
@@ -115,7 +115,7 @@ router.put("/password/:id", async (req, res) => {
   }
 });
 
-router.put("/deactivate/:id", async (req, res) => {
+router.put("/setting/deactivate/:id", async (req, res) => {
   try {
     const userId = req.params.id;
     const reqConfirmToDeactivated = req.body.confirmToDeactivated;
@@ -172,4 +172,33 @@ module.exports = router
 //   }
 // });
 
-// module.exports = router;
+router.get("/", auth, async (req, res) => {
+  try {
+    const { username } = req.user;
+    const userData = await User.findOne({ username });
+
+    if (!userData) {
+      res.status(404).json({ error: "User not found" });
+    }
+    //cal age
+    const dob = new Date(userData.DateOfBirth);
+    const age = new Date().getFullYear() - dob.getFullYear();
+
+    //เตรียมของสำหรับใช้หน้าบ้าน useContext(userData)
+    //เตรียม data ให้หน้าบ้านใช้งานได้เลย //ในที่นี้เลือกมาบางส่วน
+    //เตรียมของ req ที่รับมา ให้ math กับข้อมูลหลังบ้าน userSchema
+    res.status(200).json({
+      id: userData._id,
+      username: userData.username,
+      user_status: userData.user_status,
+      weight: userData.weight,
+      height: userData.height,
+      age,
+    });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).json({ error: "Error fetching user data" });
+  }
+});
+
+module.exports = router;
