@@ -32,6 +32,22 @@ router.get("/:id", async (request, response) => {
   }
 });
 
+//Get user post by params
+router.get("/:id", async (request, response) => {
+  try {
+    const id  = request.params.id;
+    const post = await Post.find({created_by : id});
+    if (!post) {
+      return response.status(404).json({ message: "Post not found" });
+    }
+    response.status(200).json(post);
+  } catch (error) {
+    response
+      .status(500)
+      .json({ message: "Failed to get post", error: error.message });
+  }
+});
+
 // Get one post by ID
 // router.get("/:id", async (request, response) => {
 //   try {
