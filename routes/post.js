@@ -9,7 +9,7 @@ router.get("/", async (request, response) => {
     const userId = request.query.userId;
     const posts = await Post.find({ 
       created_by: userId,
-      post_status: true });
+      post_status: true }).populate();
     response.status(200).json(posts);
   } catch (error) {
     response
@@ -18,14 +18,14 @@ router.get("/", async (request, response) => {
   }
 });
 
-// Get posts by userId
-router.get("/:userId", async (request, response) => {
+// Get posts by params
+router.get("/:id", async (request, response) => {
   try {
-    const userId = request.params.userId;
+    const id = request.params.id;
     const posts = await Post.find({
-      created_by: userId,
+      created_by: id,
       post_status: true,
-    });
+    }).populate();
     response.status(200).json(posts);
   } catch (error) {
     response.status(500).json({ message: "Failed to get posts", error: error.message });
@@ -33,20 +33,20 @@ router.get("/:userId", async (request, response) => {
 });
 
 // Get one post by ID
-router.get("/:id", async (request, response) => {
-  try {
-    const { id } = request.params;
-    const post = await Post.findById(id);
-    if (!post) {
-      return response.status(404).json({ message: "Post not found" });
-    }
-    response.status(200).json(post);
-  } catch (error) {
-    response
-      .status(500)
-      .json({ message: "Failed to get post", error: error.message });
-  }
-});
+// router.get("/:id", async (request, response) => {
+//   try {
+//     const { id } = request.params;
+//     const post = await Post.findById(id);
+//     if (!post) {
+//       return response.status(404).json({ message: "Post not found" });
+//     }
+//     response.status(200).json(post);
+//   } catch (error) {
+//     response
+//       .status(500)
+//       .json({ message: "Failed to get post", error: error.message });
+//   }
+// });
 
 // Create a new post from share activity card
 router.post("/", async (request, response) => {
