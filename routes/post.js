@@ -32,20 +32,6 @@ router.get("/:userId", async (request, response) => {
   }
 });
 
-// Get posts by userId
-router.get("/:userId", async (request, response) => {
-  try {
-    const userId = request.params.userId;
-    const posts = await Post.find({
-      created_by: userId,
-      post_status: true,
-    });
-    response.status(200).json(posts);
-  } catch (error) {
-    response.status(500).json({ message: "Failed to get posts", error: error.message });
-  }
-});
-
 //Get user post by params
 router.get("/:id", async (request, response) => {
   try {

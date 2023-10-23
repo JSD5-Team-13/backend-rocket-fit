@@ -4,9 +4,9 @@ const User = require('../models/users');
 
 router.get('/', async (req, res) => {
     try {
-        const username = req.query.username;
+        const firstname = req.query.firstname;
         const users = await User.find({ user_status: true,
-        username: { $regex: username, $options: 'i' }});
+        FirstName: { $regex: firstname, $options: 'i' }});
 
         // Check if any users were found.
         if (users.length === 0) {
