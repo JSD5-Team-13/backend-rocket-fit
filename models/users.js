@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema(
     },
     aboutMe: {
       type: String,
-      default: null,
+      default: "Let others know more about you",
     },
     following: {
       type: Array,
