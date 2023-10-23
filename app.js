@@ -48,7 +48,7 @@ app.use('/login' , require('./routes/login'))
 app.use('/activity', require('./routes/activity'));
 app.use('/post', require('./routes/post'));
 app.use('/dashboard', require('./routes/dashboard'));
-// app.use('/connection' , require('./routes/connection'))
+app.use('/connection' , require('./routes/connection'))
 app.use('/all' , require('./routes/alluser'))
 
 app.use(Auth)

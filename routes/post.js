@@ -6,7 +6,7 @@ const Activity = require("../models/activity");
 // Get all posts
 router.get("/", async (request, response) => {
   try {
-    const userId = request.query.userId
+    const userId = await request.query.userId
     const posts = await Post.find({ 
       post_status: true ,
       created_by : userId});
@@ -18,11 +18,27 @@ router.get("/", async (request, response) => {
   }
 });
 
-// Get one post by ID
+//Get user post by params
 router.get("/:id", async (request, response) => {
   try {
     const id  = request.params.id;
     const post = await Post.find({created_by : id});
+    if (!post) {
+      return response.status(404).json({ message: "Post not found" });
+    }
+    response.status(200).json(post);
+  } catch (error) {
+    response
+      .status(500)
+      .json({ message: "Failed to get post", error: error.message });
+  }
+});
+
+// Get one post by ID
+router.get("/:id", async (request, response) => {
+  try {
+    const { id } = request.params;
+    const post = await Post.findById(id);
     if (!post) {
       return response.status(404).json({ message: "Post not found" });
     }
