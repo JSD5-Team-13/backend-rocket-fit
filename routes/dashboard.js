@@ -39,6 +39,7 @@ router.get("/", async (req, res) => {
     ],
     activityPerWeek: [],
   };
+
   //เตรียมข้อมูลให้เป็นรูปแบบเดียวกันกับ initialData
   try {
     let result = initialData;
@@ -59,7 +60,7 @@ router.get("/", async (req, res) => {
       const dayDuration = result.durationPerDay[activityDayOfWeek];
       dayDuration.value += item.duration;
       const duplicatedActivity = result.activityPerWeek.find(
-        (activity) => activity.activityType === item.activity_type
+        (resultArray) => resultArray.activityType === item.activity_type
       );
 
       if (!duplicatedActivity) {
@@ -126,20 +127,23 @@ router.get("/:id", async (req, res) => {
       activity_status: true,
     });
 
-    //.setUTCHours ให้เท่ากันทั้งหมด ไม่นับเวลาที่กรอกมา
+    //กำหนดให้ today, fistDay, lastDay และ .setUTCHours ให้เท่ากันทั้งหมด ไม่นับเวลาที่กรอกมา
     const today = new Date(new Date().setUTCHours(0, 0, 0, 0));
+    const fistDay = new Date(new Date().setUTCHours(0, 0, 0, 0));
+    const lastDay = new Date(new Date().setUTCHours(0, 0, 0, 0));
 
     //วันแรกของสัปดาห์นี้ = วันนี้ของเดือน - วันของสัปดาห์
     //.getDate() ได้วันที่ 1-31
     //.getDay()  ได้ค่าวัน 0-6 (อาทิตย์=0, เสาร์=6)
     //วันนี้ อาทิตย์ ที่ 22 เดือนตุลาคม 2566
     //example: 22-6(วันอาทิตย์) = 16(วันจันทร์)
+    //.setDate() reassign ค่าวัน fistDay, lastDay
     const firstDayOfWeek = new Date(
-      today.setDate(today.getDate() - today.getDay())
+      fistDay.setDate(today.getDate() - today.getDay())
     );
 
     const lastDayOfWeek = new Date(
-      today.setDate(today.getDate() + today.getDay())
+      lastDay.setDate(today.getDate() + (6 - today.getDay()))
     );
 
     //.setUTCHours(23, 59, 59) กำหนดเวลาสิ้นสุดวันสุดท้ายของสัปดาห์
@@ -162,19 +166,21 @@ router.get("/:id", async (req, res) => {
     weeklyActivityData.forEach((item) => {
       const activityDayOfWeek = new Date(item.date).getDay(); //หาวันของสัปดาห์
       const dayDuration = result.durationPerDay[activityDayOfWeek];
-      dayDuration.value += item.duration; 
+      dayDuration.value += item.duration;
 
-    //loop ที่ 2 จะได้จำนวนครั้ง(value) และ ประเภท(activityType)
-    //การ์ดที่ได้จาก loop 1 เอามาใช้ลูปใน loop ที่ 2
-    //มีการออกกำลังกายแต่ละประเภทกี่ครั้ง ต่อ สัปดาห์
-    //การด์ที่สร้างมา activityType ตรงกับ activity_type ของ activitySchema ไหม
-    //activityPerWeek มีค่าเป็น arr [] ว่างเปล่า
-    //ค่าแรกจากการ์ดใบแรกที่ลูปมาจะเอาไปใส่ใน arr และให้ค่า value = 1
-    //การ์ดใบต่อมา ถ้าค่า activityType ซ้ำกัน ให้เพิ่มค่า value + 1
- 
-      const duplicatedActivity = result.activityPerWeek.find((resultArray) => {
-        return resultArray.activityType === item.activity_type;
-      });
+      //loop ที่ 2 จะได้จำนวนครั้ง(value) และ ประเภท(activityType)
+      //การ์ดที่ได้จาก loop 1 เอามาใช้ลูปใน loop ที่ 2
+      //มีการออกกำลังกายแต่ละประเภทกี่ครั้ง ต่อ สัปดาห์
+      //การด์ที่สร้างมา activityType ตรงกับ activity_type ของ activitySchema ไหม
+      //activityPerWeek มีค่าเป็น arr [] ว่างเปล่า
+      //ค่าแรกจากการ์ดใบแรกที่ลูปมาจะเอาไปใส่ใน arr และให้ค่า value = 1
+      //การ์ดใบต่อมา ถ้าค่า activityType ซ้ำกัน ให้เพิ่มค่า value + 1
+
+      const duplicatedActivity = result.activityPerWeek.find(
+        (resultArray) => resultArray.activityType === item.activity_type
+      );
+
+      console.log(duplicatedActivity);
 
       if (!duplicatedActivity) {
         result.activityPerWeek.push({

@@ -203,6 +203,7 @@ router.get("/", auth, async (req, res) => {
     //เตรียมของ req ที่รับมา ให้ math กับข้อมูลหลังบ้าน userSchema
     res.status(200).json({
       id: userData._id,
+      username: userData.username,
       firstname: userData.FirstName,
       lastname: userData.LastName,
       email: userData.email,

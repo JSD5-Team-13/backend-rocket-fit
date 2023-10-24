@@ -51,7 +51,7 @@ app.use('/dashboard', require('./routes/dashboard'));
 app.use('/connection' , require('./routes/connection'))
 app.use('/all' , require('./routes/alluser'))
 app.use('/upload', require('./routes/upload.js'))
-
+app.use('/sleeptime' , require('./routes/sleeptime'))
 app.use(Auth);
 app.use("/users", require("./routes/user"));
 
