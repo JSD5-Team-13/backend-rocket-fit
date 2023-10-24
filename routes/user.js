@@ -142,8 +142,8 @@ router.put("/setting/deactivate/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const {...updateUser} = req.body;
-    const user = await User.findByIdAndUpdate(id, ...updateUser);
+    const {updateUser} = req.body;
+    const user = await User.findByIdAndUpdate(id, updateUser);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
