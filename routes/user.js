@@ -4,35 +4,24 @@ const bcrypt = require("bcrypt")
 const User = require("../models/users");
 const auth = require("../middleware/auth");
 
-// router.get("/", auth, async (req, res) => {
-//   try {
-//     const user = req.user;
-//     res.status(200).json(user);
-//   } catch (error) {
-//     console.error("Error fetching user data:", error);
-//     res.status(500).json({ error: "Error fetching user data" });
-//   }
-// });
-
-
-//GET user profile
-// router.get('/setting/:id' , async (req , res) => {
-//     try {
-//       const userId = req.params.id
-//       console.log('User ID:', userId);
-//       const token = req.headers.authorization;
-//       // console.log('Authentication Token:', token);
-//       const user = await User.findById(userId);
-//       if (!user) {
-//           // No user found with the given ID
-//           return res.status(404).json({ error: 'User not found' });
-//       }
-//         res.status(200).json(user);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// });
+// GET user profile
+router.get('/setting/:id' , async (req , res) => {
+    try {
+      const userId = req.params.id
+      console.log('User ID:', userId);
+      const token = req.headers.authorization;
+      // console.log('Authentication Token:', token);
+      const user = await User.findById(userId);
+      if (!user) {
+          // No user found with the given ID
+          return res.status(404).json({ error: 'User not found' });
+      }
+        res.status(200).json(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 
 //PUT update user
 router.put("/setting/account/:id", auth, async (req, res) => {
