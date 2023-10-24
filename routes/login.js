@@ -28,7 +28,7 @@ router.post("/", async (req, res) => {
       const payload = {
         user: {
           id: user._id,
-          email : user.email,
+          email: user.email,
           user_status: user.user_status,
         },
       };
@@ -37,7 +37,7 @@ router.post("/", async (req, res) => {
       jwt.sign(
         payload, // นำสิ่งที่เรียกจาก Payload ไปเข้ารหัส
         SecretKey, // เป็น SecretOrPrivatekey เป็นชื่อที่แล้วแต่เราจะตั้งเราจะตั้งเป็นชื่ออะไรก็ได้
-        { expiresIn: "1h" }, //ตั้งเวลาว่า Token นี้หมดอายุตอนไหน
+        { expiresIn: "10d" }, //ตั้งเวลาว่า Token นี้หมดอายุตอนไหน
         // เป็น call back function เอาไว้เช็ค error รับ parameter มา 2 ตัว ถ้ามี error จะเก็บไว้ในตัวแปร error ถ้าไม่ error จะได้ token มา ก็จะเก็บ token ไว้ในตัวแปร token
         (error, token) => {
           if (error) throw error; //ถ้ามี error ก็จะโยน user ออกมาเลย

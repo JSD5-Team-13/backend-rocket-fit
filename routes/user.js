@@ -14,6 +14,7 @@ const upload = multer({
 });
 
 const fs = require("fs");
+const { log } = require("console");
 const tempFilePath = "temp-file.png"; // เลือกที่จะใช้เป็นไฟล์ชั่วคราว
 
 //GET user profile
@@ -140,41 +141,45 @@ router.put("/setting/deactivate/:id", async (req, res) => {
 });
 
 router.put("/:id", auth, async (req, res) => {
+  // console.log(req.body);
   try {
     const { id } = req.params;
     const updateUser = req.body;
+
     const user = await User.findByIdAndUpdate(id, updateUser);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const file = req.file.buffer; // แอคเซสเข้อมูลไฟล์ที่อัปโหลด
+    // const file = req.file.buffer; // แอคเซสเข้อมูลไฟล์ที่อัปโหลด
 
     // บันทึกข้อมูลจากไฟล์ไปยังไฟล์ชั่วคราว
-    fs.writeFileSync(tempFilePath, file);
+    // fs.writeFileSync(tempFilePath, file);
 
-    const upload = await cloudinary.uploader.upload(tempFilePath, {
-      upload_preset: "profile_pic",
-      public_id: id,
-      width: 200,
-      height: 200,
-      crop: "fill",
-      gravity: "face",
-      quality: 80, // หรือใช้ "crop: 'thumb'" หรือ "crop: 'scale'" ตามที่คุณต้องการ
-    });
+    // const upload = await cloudinary.uploader.upload(tempFilePath, {
+    //   upload_preset: "profile_pic",
+    //   public_id: id,
+    //   width: 200,
+    //   height: 200,
+    //   crop: "fill",
+    //   gravity: "face",
+    //   quality: 80, // หรือใช้ "crop: 'thumb'" หรือ "crop: 'scale'" ตามที่คุณต้องการ
+    // });
 
-    const pictureUrl = `https://res.cloudinary.com/dok87yplt/image/upload/v${upload.version}/${upload.public_id}.${upload.format}`;
+    // console.log(user);
 
-    console.log(pictureUrl);
+    // const pictureUrl = `https://res.cloudinary.com/dok87yplt/image/upload/v${upload.version}/${upload.public_id}.${upload.format}`;
+
+    // console.log(pictureUrl);
 
     // อัปเดต URL ในฐานข้อมูล
-    await User.findByIdAndUpdate(id, { image: pictureUrl });
+    // await User.findByIdAndUpdate(id, { image: pictureUrl });
     // ลบไฟล์ชั่วคราว
-
+    // console.log(user);
     user.isCreatedProflie = true;
     await user.save();
 
-    fs.unlinkSync(tempFilePath);
+    // fs.unlinkSync(tempFilePath);
 
     res.status(200).json(user);
   } catch (error) {
