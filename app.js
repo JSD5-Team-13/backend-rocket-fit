@@ -26,7 +26,7 @@ const allowedHeaders = ["Authorization", "Content-Type", "x-auth-token"];
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://rocket-fit.vercel.app/",
     methods: allowedMethods.join(", "),
     allowedHeaders: allowedHeaders.join(", "),
     credentials: true,
