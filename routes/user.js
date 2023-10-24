@@ -149,7 +149,9 @@ router.put("/setting/deactivate/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", upload.single("image"), async (req, res) => {
+module.exports = router;
+
+router.put("/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateUser = req.body;
