@@ -43,10 +43,10 @@ router.put("/image/profile/:id", upload.single("image"), async (req, res) => {
     });
 
     console.log(upload);
-    const pictureUrl = `https://res.cloudinary.com/dlfc9bqct/image/upload/v${upload.version}/${upload.public_id}.${upload.format}`;
+    const pictureUrl = `https://res.cloudinary.com/dok87yplt/image/upload/v${upload.version}/${upload.public_id}.${upload.format}`;
 
     // อัปเดต URL ในฐานข้อมูล
-    await User.findByIdAndUpdate(userId, { profile_url: pictureUrl });
+    await User.findByIdAndUpdate(userId, { image: pictureUrl });
 
     // ลบไฟล์ชั่วคราว
     fs.unlinkSync(tempFilePath);
