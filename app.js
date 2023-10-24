@@ -58,7 +58,7 @@ app.use("/comment", require("./routes/comment"));
 
 //Auth
 
-const ipAddress = '127.0.0.1';
+const ipAddress = '0.0.0.0';
 const port = 8000;
 
 app.listen(port, ipAddress, () => {
