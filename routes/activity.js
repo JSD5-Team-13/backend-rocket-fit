@@ -1,6 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const Activity = require("../models/activity");
+const multer = require("multer");
+const { cloudinary } = require("../configs/cloudinay");
+router.use(express.json({ limit: "50mb" }));
+router.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+});
+
+const fs = require("fs");
+const tempFilePath = "temp-file.png"; 
+
 
 // Get all activity cards
 router.get("/", async (request, response) => {
@@ -40,7 +53,7 @@ router.post("/", async (request, response) => {
     const { userId, ...newActivity } = request.body;
     const activity = await Activity.create({
       ...newActivity,
-      cnpreated_by: userId,
+      created_by: userId,
     });
     response
       .status(200)
@@ -52,16 +65,46 @@ router.post("/", async (request, response) => {
   }
 });
 
-router.post("/create", async (request, response) => {
-    const reqActivityData = req.body;
+router.post("/create", upload.single("imageActivity"),async (req, res) => {
+    const reqData = req.body;
     const userId = req.user.id
     try {
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is missing" });
+      }
+  
+      const file = req.file.buffer;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+  
       if (!reqData) {
         return res.status(400).json({ error: "Activity data is missing" });
       }
-  
+
+      fs.writeFileSync(tempFilePath, file);
+
+      const upload = await cloudinary.uploader.upload(tempFilePath, {
+        upload_preset: "activities_pic",
+        public_id: userId,
+        width: 1280,
+        height: 720,
+        crop: "fill",
+        gravity: "face",
+        quality: 80,
+        transformation: [
+          { effect: "auto_contrast" }, 
+          { bit_rate: "2000k" }]
+      });
+
+      console.log(upload);
+      const pictureUrl = `https://res.cloudinary.com/dlfc9bqct/image/upload/v${upload.version}/${upload.public_id}.${upload.format}`;
+
       const newActivity = new Activity({
-        user: req.user.id,
+        created_by: userId,
+        image: pictureUrl,
         ...reqData,
       });
   
@@ -76,11 +119,12 @@ router.post("/create", async (request, response) => {
       }
       
       const savedActivity = await newActivity.save();
+      
+      fs.unlinkSync(tempFilePath);
+      // const user = await User.findById(req.user.id);
   
-      const user = await User.findById(req.user.id);
-  
-      user.activities.push(newActivity._id);
-      await user.save();
+      // user.activities.push(newActivity._id);
+      // await user.save();
   
       res.status(201).json(savedActivity);
     } catch (error) {

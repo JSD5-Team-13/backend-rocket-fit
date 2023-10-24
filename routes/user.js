@@ -155,22 +155,22 @@ router.put("/setting/deactivate/:id", async (req, res) => {
 module.exports = router
 
 
-// router.put("/:id", auth, async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const updateUser = req.body;
-//     const user = await User.findByIdAndUpdate(id, updateUser);
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-//     user.isCreatedProflie = true;
-//     await user.save();
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateUser = req.body;
+    const user = await User.findByIdAndUpdate(id, updateUser);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    user.isCreatedProflie = true;
+    await user.save();
 
-//     res.status(200).json(user);
-//   } catch (error) {
-//     res.status(500).json({ error: "Error fetching user data" });
-//   }
-// });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching user data" });
+  }
+});
 
 router.get('/:id', async (req , res) => {
     try {
@@ -213,7 +213,7 @@ router.get("/", auth, async (req, res) => {
       following : userData.following,
       followers : userData.followers,
       aboutme: userData.aboutMe,
-      image: userData.image,
+      image: userData.profile_url,
       age,
     });
   } catch (error) {
