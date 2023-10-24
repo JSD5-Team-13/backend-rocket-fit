@@ -54,6 +54,7 @@ app.use('/upload', require('./routes/upload.js'))
 app.use('/sleeptime' , require('./routes/sleeptime'))
 app.use(Auth);
 app.use("/users", require("./routes/user"));
+app.use("/comment", require("./routes/comment"));
 
 //Auth
 
