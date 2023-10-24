@@ -33,10 +33,6 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    age: {
-      type: Number,
-      default: null,
-    },
     height: {
       type: Number,
       default: 0,
@@ -49,10 +45,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "Not specified",
     },
-    profile_url: {
-      type: String,
-      default: null,
-    },
+
     aboutMe: {
       type: String,
       default: "Let others know more about you",

@@ -1,8 +1,20 @@
-const express = require ('express');
+const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
 const User = require("../models/users");
 const auth = require("../middleware/auth");
+const multer = require("multer");
+const { cloudinary } = require("../configs/cloudinay");
+router.use(express.json({ limit: "50mb" }));
+router.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+});
+
+const fs = require("fs");
+const tempFilePath = "temp-file.png"; // เลือกที่จะใช้เป็นไฟล์ชั่วคราว
 
 router.get("/", auth, async (req, res) => {
   try {
@@ -14,31 +26,30 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-
 //GET user profile
-router.get('/setting/:id' , async (req , res) => {
-    try {
-      const userId = req.params.id
-      console.log('User ID:', userId);
-      const token = req.headers.authorization;
-      // console.log('Authentication Token:', token);
-      const user = await User.findById(userId);
-      if (!user) {
-          // No user found with the given ID
-          return res.status(404).json({ error: 'User not found' });
-      }
-        res.status(200).json(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+router.get("/setting/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    console.log("User ID:", userId);
+    const token = req.headers.authorization;
+    // console.log('Authentication Token:', token);
+    const user = await User.findById(userId);
+    if (!user) {
+      // No user found with the given ID
+      return res.status(404).json({ error: "User not found" });
     }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 //PUT update user
 router.put("/setting/account/:id", auth, async (req, res) => {
   try {
-    const userId= req.params.id;
-    console.log('User ID:', userId);
+    const userId = req.params.id;
+    console.log("User ID:", userId);
     const token = req.headers.authorization;
     // console.log('Authentication Token:', token);
     const userData = req.body;
@@ -78,37 +89,30 @@ router.put("/setting/password/:id", async (req, res) => {
     );
 
     if (!isPasswordValid) {
-      return res
-        .status(401)
-        .json({
-            message: "Incorrect current password",
-        });
+      return res.status(401).json({
+        message: "Incorrect current password",
+      });
     }
 
     // Check if the new password and renew password match
     if (newPassword !== renewPassword) {
-      return res
-        .status(400)
-        .json({ 
-            message: "New password and renew password do not match" 
-        });
+      return res.status(400).json({
+        message: "New password and renew password do not match",
+      });
     }
 
     // Hash the new password
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
     // Update the user's password and set the updated_at field
-    const updatedUserPassword = await User.findByIdAndUpdate(
-      userId,
-      {password: hashedNewPassword}
-    );
+    const updatedUserPassword = await User.findByIdAndUpdate(userId, {
+      password: hashedNewPassword,
+    });
 
-    res
-      .status(200)
-      .json({ 
-            message: "Password updated successfully",
-            user: updatedUserPassword 
-        });
+    res.status(200).json({
+      message: "Password updated successfully",
+      user: updatedUserPassword,
+    });
   } catch (error) {
     console.error("Update password error:", error);
     res.status(500).json({ error: "Password update error" });
@@ -126,10 +130,7 @@ router.put("/setting/deactivate/:id", async (req, res) => {
       });
     }
 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      {user_status: false}
-    );
+    const user = await User.findByIdAndUpdate(userId, { user_status: false });
 
     if (!user) {
       return res.status(404).json({
@@ -137,11 +138,9 @@ router.put("/setting/deactivate/:id", async (req, res) => {
       });
     }
 
-    res
-      .status(201)
-      .json({ 
-            message: `The account for user "${user.username}" has been successfully deleted` 
-        });
+    res.status(201).json({
+      message: `The account for user "${user.username}" has been successfully deleted`,
+    });
   } catch (error) {
     console.error(error);
     res
@@ -150,12 +149,7 @@ router.put("/setting/deactivate/:id", async (req, res) => {
   }
 });
 
-
-
-module.exports = router
-
-
-router.put("/:id", auth, async (req, res) => {
+router.put("/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
     const updateUser = req.body;
@@ -163,8 +157,34 @@ router.put("/:id", auth, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    const file = req.file.buffer; // แอคเซสเข้อมูลไฟล์ที่อัปโหลด
+
+    // บันทึกข้อมูลจากไฟล์ไปยังไฟล์ชั่วคราว
+    fs.writeFileSync(tempFilePath, file);
+
+    const upload = await cloudinary.uploader.upload(tempFilePath, {
+      upload_preset: "profile_pic",
+      public_id: id,
+      width: 200,
+      height: 200,
+      crop: "fill",
+      gravity: "face",
+      quality: 80, // หรือใช้ "crop: 'thumb'" หรือ "crop: 'scale'" ตามที่คุณต้องการ
+    });
+
+    const pictureUrl = `https://res.cloudinary.com/dok87yplt/image/upload/v${upload.version}/${upload.public_id}.${upload.format}`;
+
+    console.log(pictureUrl);
+
+    // อัปเดต URL ในฐานข้อมูล
+    await User.findByIdAndUpdate(id, { image: pictureUrl });
+    // ลบไฟล์ชั่วคราว
+
     user.isCreatedProflie = true;
     await user.save();
+
+    fs.unlinkSync(tempFilePath);
 
     res.status(200).json(user);
   } catch (error) {
@@ -172,19 +192,19 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-router.get('/:id', async (req , res) => {
-    try {
-        const id = req.params.id
-        const user = await User.findById(id)
-        if (!user) {
-            res.status(401).json({ user: "user not found"})
-        }
-        res.status(200).json(user);
-    } catch (error) {
-        console.error('Error fetching user data:', error);
-        res.status(500).json({ error: 'Error fetching user data' });
+router.get("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+    if (!user) {
+      res.status(401).json({ user: "user not found" });
     }
-})
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).json({ error: "Error fetching user data" });
+  }
+});
 
 router.get("/", auth, async (req, res) => {
   try {
@@ -210,10 +230,10 @@ router.get("/", auth, async (req, res) => {
       user_status: userData.user_status,
       weight: userData.weight,
       height: userData.height,
-      following : userData.following,
-      followers : userData.followers,
+      following: userData.following,
+      followers: userData.followers,
       aboutme: userData.aboutMe,
-      image: userData.profile_url,
+      image: userData.image,
       age,
     });
   } catch (error) {
