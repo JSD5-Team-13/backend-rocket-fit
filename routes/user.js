@@ -139,7 +139,7 @@ router.put("/setting/deactivate/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", auth, async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const updateUser = req.body;
