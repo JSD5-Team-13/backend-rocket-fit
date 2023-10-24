@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      default: null,
+      default: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
     },
     FirstName: {
       type: String,
@@ -33,10 +33,6 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    age: {
-      type: Number,
-      default: null,
-    },
     height: {
       type: Number,
       default: 0,
@@ -49,10 +45,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "Not specified",
     },
-    profile_url: {
-      type: String,
-      default: null,
-    },
+
     aboutMe: {
       type: String,
       default: "Let others know more about you",
