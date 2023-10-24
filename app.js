@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const logging = require("morgan");
 const Auth = require("./middleware/auth.js");
+const http = require('http');
 require("dotenv").config();
 
 const app = express();
@@ -26,7 +27,7 @@ const allowedHeaders = ["Authorization", "Content-Type", "x-auth-token"];
 
 app.use(
   cors({
-    origin: "https://rocket-fit.vercel.app/",
+    origin: "https://rocket-fit.vercel.app",
     methods: allowedMethods.join(", "),
     allowedHeaders: allowedHeaders.join(", "),
     credentials: true,
@@ -61,8 +62,11 @@ app.use("/comment", require("./routes/comment"));
 const ipAddress = '0.0.0.0';
 const port = 8000;
 
-app.listen(port, ipAddress, () => {
-  console.log(`Server starting on IP:${ipAddress} Port: ${port}`);
+const server = http.createServer(app);
+
+// Start the HTTP server
+server.listen(port, ipAddress, () => {
+  console.log(`Server starting on IP: ${ipAddress} Port: ${port}`);
 });
 
 module.exports = app;
