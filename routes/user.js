@@ -4,18 +4,7 @@ const bcrypt = require("bcrypt")
 const User = require("../models/users");
 const auth = require("../middleware/auth");
 
-router.get("/", auth, async (req, res) => {
-  try {
-    const user = req.user;
-    res.status(200).json(user);
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    res.status(500).json({ error: "Error fetching user data" });
-  }
-});
-
-
-//GET user profile
+// GET user profile
 router.get('/setting/:id' , async (req , res) => {
     try {
       const userId = req.params.id
@@ -149,11 +138,6 @@ router.put("/setting/deactivate/:id", async (req, res) => {
       .json({ error: "An error occurred while deleting the account." });
   }
 });
-
-
-
-module.exports = router
-
 
 router.put("/:id", auth, async (req, res) => {
   try {
