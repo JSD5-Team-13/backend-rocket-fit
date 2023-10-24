@@ -40,7 +40,7 @@ router.post("/", async (request, response) => {
     const { userId, ...newActivity } = request.body;
     const activity = await Activity.create({
       ...newActivity,
-      cnpreated_by: userId,
+      created_by: userId,
     });
     response
       .status(200)

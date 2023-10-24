@@ -53,6 +53,7 @@ app.use('/all' , require('./routes/alluser'))
 app.use('/sleeptime' , require('./routes/sleeptime'))
 app.use(Auth);
 app.use("/users", require("./routes/user"));
+app.use("/comment", require("./routes/comment"));
 
 //Auth
 

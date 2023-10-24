@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const User = require("./users");
+const Comment =  require("./comment");
 
 const postSchema = new mongoose.Schema(
   {
@@ -9,11 +10,16 @@ const postSchema = new mongoose.Schema(
     duration: Number,
     image: String,
     created_by: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
     post_status: {
       type: Boolean,
       default: true,
     },
-    created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
   },
   { collection: "posts", timestamps: true }
 );
