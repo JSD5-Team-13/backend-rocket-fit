@@ -86,9 +86,6 @@ router.post("/create", upload.single("imageActivity"), async (req, res) => {
 
           const upload = await cloudinary.uploader.upload(tempFilePath, {
               upload_preset: "activities_pic",
-              width: 1280,
-              height: 720,
-              crop: "fill",
               gravity: "face",
               quality: 80,
               transformation: [
