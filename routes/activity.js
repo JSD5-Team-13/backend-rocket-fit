@@ -5,6 +5,7 @@ const multer = require("multer");
 const { cloudinary } = require("../configs/cloudinay");
 router.use(express.json({ limit: "50mb" }));
 router.use(express.urlencoded({ limit: "50mb", extended: true }));
+const User = require("../models/users");
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -65,73 +66,86 @@ router.post("/", async (request, response) => {
   }
 });
 
-router.post("/create", upload.single("imageActivity"),async (req, res) => {
-    const reqData = req.body;
-    const userId = req.user.id
-    try {
+router.post("/create", upload.single("imageActivity"), async (req, res) => {
+  const { userId, ...reqData } = req.body;
+
+  try {
       if (!userId) {
-        return res.status(400).json({ error: "User ID is missing" });
+          return res.status(400).json({ error: "User ID is missing" });
       }
-  
-      const file = req.file.buffer;
 
       const user = await User.findById(userId);
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-  
-      if (!reqData) {
-        return res.status(400).json({ error: "Activity data is missing" });
+          return res.status(404).json({ error: "User not found" });
       }
 
-      fs.writeFileSync(tempFilePath, file);
+      if (req.file !== undefined) {  // แก้ให้เป็น !== undefined
+          const file = req.file.buffer;
 
-      const upload = await cloudinary.uploader.upload(tempFilePath, {
-        upload_preset: "activities_pic",
-        public_id: userId,
-        width: 1280,
-        height: 720,
-        crop: "fill",
-        gravity: "face",
-        quality: 80,
-        transformation: [
-          { effect: "auto_contrast" }, 
-          { bit_rate: "2000k" }]
-      });
+          fs.writeFileSync(tempFilePath, file);
 
-      console.log(upload);
-      const pictureUrl = `https://res.cloudinary.com/dlfc9bqct/image/upload/v${upload.version}/${upload.public_id}.${upload.format}`;
+          const upload = await cloudinary.uploader.upload(tempFilePath, {
+              upload_preset: "activities_pic",
+              width: 1280,
+              height: 720,
+              crop: "fill",
+              gravity: "face",
+              quality: 80,
+              transformation: [
+                  { effect: "auto_contrast" },
+                  { bit_rate: "2000k" }
+              ]
+          });
 
-      const newActivity = new Activity({
-        created_by: userId,
-        image: pictureUrl,
-        ...reqData,
-      });
-  
-      const validationError = newActivity.validateSync();
-  
-      if (validationError) {
-        const errors = Object.values(validationError.errors).map(
-          (error) => error.message
-        );
-  
-        return res.status(400).json({ error: errors });
+          const pictureUrl = `https://res.cloudinary.com/dok87yplt/image/upload/v${upload.version}/${upload.public_id}.${upload.format}`;
+
+          const newActivity = await Activity.create({
+              created_by: userId,
+              image: pictureUrl,
+              ...reqData,
+          });
+
+          const validationError = newActivity.validateSync();
+
+          if (validationError) {
+              const errors = Object.values(validationError.errors).map(
+                  (error) => error.message
+              );
+
+              return res.status(400).json({ error: errors });
+          }
+
+          const savedActivity = await newActivity.save();
+
+          fs.unlinkSync(tempFilePath);
+          res.status(201).json(savedActivity);
+          console.log(pictureUrl)
+      } else {
+          // ถ้าไม่มีรูปภาพให้สร้างกิจกรรมโดยใช้ข้อมูลที่มีอยู่
+          const newActivity = await Activity.create({
+              created_by: userId,
+              ...reqData,
+          });
+
+          const validationError = newActivity.validateSync();
+
+          if (validationError) {
+              const errors = Object.values(validationError.errors).map(
+                  (error) => error.message
+              );
+
+              return res.status(400).json({ error: errors });
+          }
+
+          const savedActivity = await newActivity.save();
+
+          res.status(201).json(savedActivity);
       }
-      
-      const savedActivity = await newActivity.save();
-      
-      fs.unlinkSync(tempFilePath);
-      // const user = await User.findById(req.user.id);
-  
-      // user.activities.push(newActivity._id);
-      // await user.save();
-  
-      res.status(201).json(savedActivity);
-    } catch (error) {
+  } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
-    }
-  });
+  }
+});
 
 
 
