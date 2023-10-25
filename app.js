@@ -59,7 +59,7 @@ app.use("/comment", require("./routes/comment"));
 
 //Auth
 // '0.0.0.0'
-const ipAddress = "127.0.0.1";
+const ipAddress = "0.0.0.0";
 const port = 8000;
 
 const server = http.createServer(app);
